@@ -1,16 +1,18 @@
 package main
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
 	"net/http"
 )
 
 type Password struct {
-	ID       int    `json:"id"`
-	Password string `json:"password"`
-	Strength int    `json:"strength"`
+	id       int    `json:"id"`
+	password string `json:"password"`
+	strength int    `json:"strength"`
 }
 
 type Config struct {
@@ -18,6 +20,8 @@ type Config struct {
 	DBSource      string `mapstructure:"DB_SOURCE"`
 	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
 }
+
+var db *sql.DB
 
 func loadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
@@ -36,11 +40,11 @@ func loadConfig(path string) (config Config, err error) {
 }
 
 // temporary collection that replaces db
-var passwords = []Password{
-	{ID: 1, Password: "intel1", Strength: 0},
-	{ID: 2, Password: "elyass15@ajilent-ci", Strength: 2},
-	{ID: 3, Password: "hodygid757#$!23w", Strength: 1},
-}
+/*var passwords = []Password{
+	{id: 1, password: "intel1", strength: 0},
+	{id: 2, password: "elyass15@ajilent-ci", strength: 2},
+	{id: 3, password: "hodygid757#$!23w", strength: 1},
+}*/
 
 func main() {
 
@@ -49,10 +53,10 @@ func main() {
 		log.Fatal("cannot load config:", err)
 	}
 
-	/*conn, err := sql.Open(config.DBDriver, config.DBSource)
+	db, err = sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
-	}*/
+	}
 
 	router := gin.Default()
 	router.GET("/api/v1/passwords", getPasswords)
@@ -62,15 +66,46 @@ func main() {
 }
 
 func getPasswords(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
+	rows, err := db.Query("SELECT id, password, strength FROM passwords")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var passwords []Password
+	for rows.Next() {
+		var a Password
+		err := rows.Scan(&a.id, &a.password, &a.strength)
+		if err != nil {
+			log.Fatal(err)
+		}
+		passwords = append(passwords, a)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	c.IndentedJSON(http.StatusOK, passwords)
 }
 
 func postPassword(c *gin.Context) {
 	var newPassword Password
 	if err := c.BindJSON(&newPassword); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-	newPassword.ID = passwords[len(passwords)-1].ID + 1
-	passwords = append(passwords, newPassword)
-	c.IndentedJSON(http.StatusCreated, newPassword)
+
+	stmt, err := db.Prepare("INSERT INTO passwords (password, strength) VALUES ($2, $3)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	if _, err := stmt.Exec(newPassword.id, newPassword.password, newPassword.strength); err != nil {
+		log.Fatal(err)
+	}
+
+	c.JSON(http.StatusCreated, newPassword)
 }
