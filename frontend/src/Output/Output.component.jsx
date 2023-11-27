@@ -45,7 +45,7 @@ export const OutputSubList = ({ output, expanded }) => {
 
 export const OutputList = ({ useOutputs }) => {
 
-    return <div class=" p-5 rounded-2xl  overflow-y-visible overflow-x-hidden  mx-auto w-2/5" style={{ "maxHeight": "50vh", "minWidth": "400pt" }}>
+    return <div class=" p-5 rounded-2xl mx-auto w-2/5" style={{  "minWidth": "400pt" }}>
         <OutputSubList expanded/>
         <OutputSubList/>
     </div>
