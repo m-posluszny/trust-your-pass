@@ -1,11 +1,15 @@
 package main
 
 import (
-	"database/sql"
+	"context"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
-	"github.com/spf13/viper"
-	"log"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"inf/gateway-service/configs"
+	_ "log"
 	"net/http"
 )
 
@@ -15,97 +19,49 @@ type Password struct {
 	strength int    `json:"strength"`
 }
 
-type Config struct {
-	DBDriver      string `mapstructure:"DB_DRIVER"`
-	DBSource      string `mapstructure:"DB_SOURCE"`
-	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
-}
-
-var db *sql.DB
-
-func loadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("application")
-	viper.SetConfigType("env")
-
-	viper.AutomaticEnv()
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
-	}
-
-	err = viper.Unmarshal(&config)
-	return
-}
-
-// temporary collection that replaces db
-/*var passwords = []Password{
-	{id: 1, password: "intel1", strength: 0},
-	{id: 2, password: "elyass15@ajilent-ci", strength: 2},
-	{id: 3, password: "hodygid757#$!23w", strength: 1},
-}*/
+var PasswordColletion *mongo.Collection
 
 func main() {
 
-	config, err := loadConfig(".")
-	if err != nil {
-		log.Fatal("cannot load config:", err)
-	}
+	configs.InitEnvConfigs()
 
-	db, err = sql.Open(config.DBDriver, config.DBSource)
+	//Connect with mongo
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(configs.EnvList.MongoUri))
 	if err != nil {
-		log.Fatal("cannot connect to db:", err)
+		panic(err)
 	}
+	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
+		panic(err)
+	}
+	PasswordColletion = client.Database(configs.EnvList.DbName).Collection(configs.EnvList.CollectionName)
 
 	router := gin.Default()
 	router.GET("/api/v1/passwords", getPasswords)
 	router.POST("/api/v1/passwords", postPassword)
 
-	router.Run(config.ServerAddress)
+	router.Run(configs.EnvList.ServerAddress)
 }
 
 func getPasswords(c *gin.Context) {
-	c.Header("Content-Type", "application/json")
-	rows, err := db.Query("SELECT id, password, strength FROM passwords")
+	filter := bson.D{{}}
+	cursor, err := PasswordColletion.Find(context.TODO(), filter)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	defer rows.Close()
-
-	var passwords []Password
-	for rows.Next() {
-		var a Password
-		err := rows.Scan(&a.id, &a.password, &a.strength)
-		if err != nil {
-			log.Fatal(err)
-		}
-		passwords = append(passwords, a)
+	var results []Password
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		panic(err)
 	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c.IndentedJSON(http.StatusOK, passwords)
+	res, _ := json.Marshal(results)
+	c.IndentedJSON(http.StatusOK, res)
 }
 
 func postPassword(c *gin.Context) {
-	var newPassword Password
-	if err := c.BindJSON(&newPassword); err != nil {
+	var requestBody Password
+	if err := c.BindJSON(&requestBody); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-
-	stmt, err := db.Prepare("INSERT INTO passwords (password, strength) VALUES ($2, $3)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	if _, err := stmt.Exec(newPassword.id, newPassword.password, newPassword.strength); err != nil {
-		log.Fatal(err)
-	}
-
-	c.JSON(http.StatusCreated, newPassword)
+	cursor, _ := PasswordColletion.InsertOne(context.TODO(), requestBody)
+	c.JSON(http.StatusCreated, cursor.InsertedID)
 }

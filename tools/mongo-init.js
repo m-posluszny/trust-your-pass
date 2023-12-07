@@ -2,17 +2,17 @@ db = db.getSiblingDB('sample_db');
 
 db.createCollection('passwords');
 
-db.sample_collection.insertMany([
+db.passwords.insertMany([
     {
         password: 'intel1',
         strength: '0'
     },
     {
-        filter: 'elyass15@ajilent-ci',
-        addrs: '2'
+        password: 'elyass15@ajilent-ci',
+        strength: '2'
     },
     {
-        filter: 'hodygid757#$!23w',
-        addrs: '1'
+        password: 'hodygid757#$!23w',
+        strength: '1'
     }
 ]);

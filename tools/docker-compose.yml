@@ -1,17 +1,4 @@
 services:
-  postgres_db:
-    container_name: postgres
-    image: postgres:latest
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin123
-    restart: on-failure
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    network_mode: bridge
-
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
@@ -19,35 +6,45 @@ services:
       - 5672:5672
       - 15672:15672
     restart: on-failure
-    volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-    network_mode: bridge
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    networks:
+      - bridge-network
 
   mongo:
-    image: mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: 123456
+    image: mongo:7.0.3
+    restart: on-failure
     ports:
-      - "27017:27017"
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASSWORD}
     volumes:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    network_mode: bridge
+    networks:
+      - bridge-network
 
   # Database manager and user inteface
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.0-20
+    restart: on-failure
     ports:
-      - 8099:8081
+      - 9081:8081
+    environment:
+      #ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_UI_USERNAME}
+      #ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_UI_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@mongo:27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_UI_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_UI_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_UI_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_UI_PASSWORD}
     depends_on:
       - mongo
-    environment:
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: 123456
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: 123456
-    links:
-      - mongo
-    network_mode: bridge
+    networks:
+      - bridge-network
+
+#docker network create -d bridge bridge-network
+networks:
+  bridge-network:
+    external: true
