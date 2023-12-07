@@ -52,7 +52,13 @@ func getPasswords(c *gin.Context) {
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		panic(err)
 	}
-	res, _ := json.Marshal(results)
+	//TODO fix parsing
+	var outputJson [][]byte
+	for _, result := range results {
+		res, _ := json.Marshal(result)
+		outputJson = append(outputJson, res)
+	}
+	res, _ := json.MarshalIndent(outputJson, "", "  ")
 	c.IndentedJSON(http.StatusOK, res)
 }
 
