@@ -3,7 +3,9 @@ module inf/gateway-service
 go 1.21.4
 
 require (
+	github.com/agrison/go-commons-lang v0.0.0-20230627184709-5cc85301fd96
 	github.com/gin-gonic/gin v1.9.1
+	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/spf13/viper v1.17.0
 	go.mongodb.org/mongo-driver v1.13.1
 )

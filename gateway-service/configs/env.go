@@ -15,10 +15,11 @@ func InitEnvConfigs() {
 
 // struct to map env values
 type envList struct {
-	ServerAddress  string `mapstructure:"SERVER_ADDRESS"`
-	MongoUri       string `mapstructure:"MONGO_URI"`
-	DbName         string `mapstructure:"MONGO_DB_NAME"`
-	CollectionName string `mapstructure:"MONGO_COLLECTION_NAME"`
+	ServerAddress            string `mapstructure:"SERVER_ADDRESS"`
+	MongoUri                 string `mapstructure:"MONGO_URI"`
+	DbName                   string `mapstructure:"MONGO_DB_NAME"`
+	CollectionName           string `mapstructure:"MONGO_COLLECTION_NAME"`
+	RabbitMQConnectionString string `mapstructure:"RABBITMQ_CONNECTION_STRING"`
 }
 
 // Call to load the variables from env
