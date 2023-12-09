@@ -1,19 +1,18 @@
-import { Title } from '../Static/Title.component';
-import { Footer } from '../Static/Footer.component';
-import { OutputList } from '../Output/Output.component';
-import { Container } from '../Static/Container.component';
-import { PassInput } from '../Input/Input.component';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { MainView} from "../Views/Main";
+import {AboutView } from "../Views/About"
+import { Container } from "../Static/Container.component";
 
 
 function App() {
   return (
     <Container>
-      <main class="flex my-auto flex-col  overflow-y-visible overflow-x-hidden h-[100vh]">
-        <Title/>
-        <PassInput/>
-        <OutputList/>
-      </main>
-      <Footer/>
+      <BrowserRouter>
+        <Routes>
+          <Route exact path="/about" element={<AboutView/> }/>
+          <Route path="/" element={ <MainView/>}/>
+      </Routes>
+      </BrowserRouter>
     </Container>
   );
 }
