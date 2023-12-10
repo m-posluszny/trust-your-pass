@@ -22,8 +22,8 @@ func main() {
 	mongoClient := configs.GetMongoClient()
 	defer mongoClient.Disconnect(context.TODO())
 
-	rmqConn := configs.GetConnection()
-	defer rmqConn.Close()
+	//rmqConn := configs.GetConnection()
+	//defer rmqConn.Close()
 
 	router := gin.Default()
 	passwords.SetupRoutes(router)

@@ -8,38 +8,22 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "password": ""
+  "password": "asdc!#"
 }
 
 ###
 
-POST http://localhost:10000/api/v1/passwords/
+GET http://localhost:10000/api/v1/passwords/6575b9bfa60e2383e67cb4da
 Accept: application/json
-Content-Type: application/json
-
-{
-  "password": ""
-}
 
 ###
 
-GET http://localhost:10000/api/v1/passwords/!23w2213211242
-Content-Type: application/json
-
-###
-
-GET http://localhost:10000/api/v1/passwords/asdadasddassasdasdasdas321
-Content-Type: application/json
-
-###
-
-
-PATCH http://localhost:10000/api/v1/passwords/as3as32123213
+PATCH http://localhost:10000/api/v1/passwords/6575b9bfa60e2383e67cb4da
 Content-Type: application/json
 Accept: application/json
 
 {
-  "strength": 2
+  "strength": 3
 }
 
 ###
