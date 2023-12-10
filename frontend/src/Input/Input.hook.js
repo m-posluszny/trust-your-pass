@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useResults } from "../Output/Output.hook";
 import { post } from "../Api/core";
 
@@ -6,8 +6,17 @@ export const PASSWORD = () => `api/v1/passwords`;
 
 export const useGetPassword = () => { 
     const [loading, setLoading] = useState(false);
-    const {editResult} = useResults();
+    const {addResult} = useResults();
+
     const [createError, setError] = useState(null);
+        useEffect(() => {
+            if (loading) {
+            const timer = setTimeout(() => {
+                setLoading(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+      }, [loading]);
 
 
     return {
@@ -16,11 +25,11 @@ export const useGetPassword = () => {
         sendPassword: (password) => { 
             setLoading(true);
             post(PASSWORD(), { password }).then((res) => {
-                editResult(res);
-                setLoading(false);
+                addResult(res, {
+                    passwordLen: password.length,
+                });
             }).catch((err) => {
                 setError(err);
-                setLoading(false);
             })
         } 
     }

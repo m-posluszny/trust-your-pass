@@ -1,34 +1,46 @@
 import { useEffect, useState } from "react";
 import { useCore} from "../Api/core.hook"
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { OutputError, OutputLoading, OutputSuccess } from "./Output.type";
 
 export const PASSWORDS = (uid) => `api/v1/passwords/${uid}`;
 
 export const useResults = () => {
-    const [results, setResults] = useLocalStorage("results", {});
+    const [results, setResults] = useLocalStorage("results", []);
 
-    const editResult = (result) => { 
-        results[result.id] = result;
-        if (!results[result.id].date) {
-            results[result.id].date = (new Date()).toString();} ;
+    const addResult = (result, metadata) => {
+        result.date =  new Date().toString();
+        result.meta = metadata
+        setResults([...results, result])
+    }
+
+    const editResult = (i, result) => { 
+        result.meta = results[i].meta;
+        results[i] = result;
         setResults(results);
     }
     
     return {
-        resultsMap: results,
-        results: Object.values(results).sort((a, b) => Date.parse(b.date) - Date.parse(a.date)),
+        results:results.sort((a, b) => Date.parse(b.date) - Date.parse(a.date)),
         editResult,
+        addResult
     }
 }
 
-export const useResult = (id) => {
-    const {editResult, resultsMap} = useResults();
-    const [output, setOutput] = useState(resultsMap[id]);
+export const useResult = (i) => {
+    const {editResult,  results} = useResults();
+    const [output, setOutput] = useState(results[i]);
+    let state = OutputError
+    if (!output?.isProcessed) {
+        state = OutputLoading
+    } else if (output?.preconditions?.every && output?.preconditions?.every((prec => prec.isSatisfied))) {
+        state = OutputSuccess
+    }
 
     const { data, error } = useCore(
-        PASSWORDS(id),
+        PASSWORDS(i),
         {},
-        typeof id === "string" && id !== "",
+        typeof i === "string" && i !== "",
         {
           refreshInterval: output?.isProcessing ? 10 : 0,
           revalidateIfStale: false,
@@ -37,19 +49,19 @@ export const useResult = (id) => {
         }
       );
 
-    console.log(data)
     useEffect(() => {
-        setOutput(resultsMap[id]);
-    },[])
+        setOutput(results[i]);
+    },[i, results])
     
     useEffect(() => {
-        if (data && resultsMap[id] !== data) 
+        if (data && results[i] !== data) 
         {
-            editResult(data);
+            editResult(i, data);
         }
     },[])
 
     return {
+        state,
         output,
         error,
     }
