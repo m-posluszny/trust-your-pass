@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/agrison/go-commons-lang/stringUtils"
 	"github.com/gin-gonic/gin"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"inf/gateway-service/configs"
+	"inf/gateway-service/utils"
 	"net/http"
 )
 
@@ -67,7 +67,7 @@ func main() {
 	router.POST("/api/v1/passwords", insert)
 
 	//TODO should be done by listener instead?
-	router.PATCH("/api/v1/passwords/:password/update", updateStrength)
+	router.PATCH("/api/v1/passwords/:password", updateStrength)
 
 	router.Run(configs.EnvList.ServerAddress)
 }
@@ -88,8 +88,8 @@ func getAll(c *gin.Context) {
 func getByPassword(c *gin.Context) {
 	password := c.Param("password")
 
-	preconditions := validateInput(password)
-	isValid := arePreconditionsSatisfied(preconditions)
+	preconditions := utils.ValidateInput(password)
+	isValid := utils.ArePreconditionsSatisfied(preconditions)
 	//why do I use 400 in that case: https://stackoverflow.com/questions/3290182/which-status-code-should-i-use-for-failed-validations-or-invalid-duplicates
 	if !isValid {
 		c.JSON(http.StatusBadRequest, preconditions)
@@ -117,8 +117,8 @@ func insert(c *gin.Context) {
 	}
 
 	//validate if string consists of all spaces, etc
-	preconditions := validateInput(requestBody.Password)
-	isValid := arePreconditionsSatisfied(preconditions)
+	preconditions := utils.ValidateInput(requestBody.Password)
+	isValid := utils.ArePreconditionsSatisfied(preconditions)
 	//why do I use 400 in that case: https://stackoverflow.com/questions/3290182/which-status-code-should-i-use-for-failed-validations-or-invalid-duplicates
 	if !isValid {
 		c.JSON(http.StatusBadRequest, PostResponseDto{
@@ -134,11 +134,12 @@ func insert(c *gin.Context) {
 	result, err := PasswordCollection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
 		//mongo query issue - unlikely to happen
+		//no content?
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	//TODO id+preconditions
+	//id+preconditions
 	c.JSON(http.StatusCreated, PostResponseDto{
 		Id:            result.UpsertedID,
 		Preconditions: preconditions,
@@ -146,43 +147,22 @@ func insert(c *gin.Context) {
 	})
 }
 
-const lengthCondition = "Password should contain at least 4 signs"
-const nonEmptyStringCondition = "Provided string is not empty"
-const nonWhitespacesOnlyCondition = "Provided string doesnt consists of whitespaces only"
-const notAllowedSymbolsCondition = "Provided string doesnt contain symbols that are not allowed"
-
-func validateInput(password string) map[string]bool {
-
-	var preconditions = map[string]bool{
-		lengthCondition:             false,
-		nonEmptyStringCondition:     false,
-		nonWhitespacesOnlyCondition: false,
-		notAllowedSymbolsCondition:  false}
-
-	if len(password) >= 4 {
-		preconditions[lengthCondition] = true
-	}
-	if !stringUtils.IsBlank(password) {
-		preconditions[nonEmptyStringCondition] = true
-	}
-	if !stringUtils.IsWhitespace(password) {
-		preconditions[nonWhitespacesOnlyCondition] = true
-	}
-	if !stringUtils.ContainsAny(password, "\\0") {
-		preconditions[notAllowedSymbolsCondition] = true
-	}
-
-	return preconditions
-}
-
-func arePreconditionsSatisfied(preconditions map[string]bool) bool {
-	for _, v := range preconditions {
-		if v == false {
-			return false
-		}
-	}
-	return true
-}
-
 func updateStrength(c *gin.Context) {
+	password := c.Param("password")
+	var requestBody map[string]int
+	if err := c.BindJSON(&requestBody); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	filter := bson.D{{"password", password}}
+	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"isProcessed", true}}}}
+	opts := options.Update()
+	_, err := PasswordCollection.UpdateOne(context.TODO(), filter, update, opts)
+	if err != nil {
+		//mongo query issue - unlikely to happen
+		//no content?
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, bson.M{"updated": true})
 }
