@@ -8,15 +8,31 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "password": "as3as321"
+  "password": ""
 }
 
 ###
 
-GET http://localhost:10000/api/v1/passwords/as3as321
+POST http://localhost:10000/api/v1/passwords/
 Accept: application/json
+Content-Type: application/json
+
+{
+  "password": ""
+}
 
 ###
+
+GET http://localhost:10000/api/v1/passwords/!23w2213211242
+Content-Type: application/json
+
+###
+
+GET http://localhost:10000/api/v1/passwords/asdadasddassasdasdasdas321
+Content-Type: application/json
+
+###
+
 
 PATCH http://localhost:10000/api/v1/passwords/as3as32123213
 Content-Type: application/json
