@@ -8,13 +8,22 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "password": "notEstimatedYet",
-  "strength": -1
+  "password": ""
 }
 
 ###
 
-GET http://localhost:10000/api/v1/passwords/elyass15@ajilent-ci
+POST http://localhost:10000/api/v1/passwords/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "password": ""
+}
+
+###
+
+GET http://localhost:10000/api/v1/passwords/!23w2213211242
 Content-Type: application/json
 
 ###
