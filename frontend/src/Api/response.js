@@ -1,5 +1,5 @@
   export function handleResponse(response) {
-    return response;
+    return response.data;
   }
   
   export function handleError(error) {

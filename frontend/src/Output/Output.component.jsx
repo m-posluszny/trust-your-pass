@@ -33,7 +33,7 @@ export const OutputSubList = ({ output, expanded }) => {
         </div>
         <div className={`${isExpanded ? 'h-72' : 'h-0'
             } transition-[height]  duration-100 overflow-hidden w-full`}>
-            {output.preconditions.map((precondition) =>
+            {output?.preconditions?.map((precondition) =>
                 <OutputTile type={precondition.isValid ? OutputSuccess : OutputError} message={precondition.message} />
             )}
 
