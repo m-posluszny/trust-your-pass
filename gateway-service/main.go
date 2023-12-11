@@ -15,19 +15,18 @@ import (
 //TODO tests
 //TODO golang app docker compose
 
-//TODO wątek dla rabbitmq
-
 func main() {
 
 	mongoClient := configs.GetMongoClient()
 	defer mongoClient.Disconnect(context.TODO())
 
-	//rmqConn := configs.GetConnection()
-	//defer rmqConn.Close()
+	rmqConn := configs.GetConnection()
+	defer rmqConn.Close()
 
 	router := gin.Default()
 	passwords.SetupRoutes(router)
 	router.Use(cors.Default())
 
 	router.Run(configs.EnvList.ServerAddress)
+
 }

@@ -8,6 +8,8 @@ import (
 
 var rmqConnection *amqp.Connection
 var rmqChannel *amqp.Channel
+var rmqModelInQueue *amqp.Queue
+var rmqModelOutQueue *amqp.Queue
 
 func InitRabbitMQConnection() (*amqp.Connection, *amqp.Channel) {
 	InitEnvConfigs()
@@ -25,6 +27,8 @@ func InitRabbitMQConnection() (*amqp.Connection, *amqp.Channel) {
 	log.Printf("Succesfully connected to rabbitmq broker")
 	rmqConnection = conn
 	rmqChannel = ch
+	GetModelInQueue()
+	GetModelOutQueue()
 	return conn, ch
 }
 
@@ -40,4 +44,33 @@ func GetConnection() *amqp.Connection {
 		InitRabbitMQConnection()
 	}
 	return rmqConnection
+}
+
+func DeclareQueue(queueName string) *amqp.Queue {
+	queue, err := GetChannel().QueueDeclare(
+		queueName,
+		true,
+		false,
+		false,
+		true,
+		nil,
+	)
+	if err != nil {
+		log.Fatalf("Could not declare %s queue", queueName)
+	}
+	return &queue
+}
+
+func GetModelInQueue() *amqp.Queue {
+	if rmqModelInQueue == nil {
+		rmqModelInQueue = DeclareQueue(EnvList.RabbitMQModelInQueueName)
+	}
+	return rmqModelInQueue
+}
+
+func GetModelOutQueue() *amqp.Queue {
+	if rmqModelOutQueue == nil {
+		rmqModelOutQueue = DeclareQueue(EnvList.RabbitMQModelOutQueueName)
+	}
+	return rmqModelOutQueue
 }
