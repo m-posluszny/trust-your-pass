@@ -23,11 +23,11 @@ type PostResponseDto struct {
 }
 
 type ModelInMessageDto struct {
-	Id       primitive.ObjectID `json:"_id" bson:"_id"`
-	Password string             `json:"password" bson:"password"`
+	Id       interface{} `json:"_id" bson:"_id"`
+	Password string      `json:"password" bson:"password"`
 }
 
 type ModelOutMessageDto struct {
-	Id       primitive.ObjectID `json:"_id" bson:"_id"`
-	Strength int                `json:"strength"`
+	Id       string `json:"_id" bson:"_id"`
+	Strength int    `json:"strength"`
 }

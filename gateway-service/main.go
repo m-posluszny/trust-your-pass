@@ -9,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//TODO set default value of strength to -1 or similar
-//TODO use interfaces, controllers, interfacesImpl
 //TODO put events to rabbitmq, add listener
 //TODO tests
 //TODO golang app docker compose
@@ -20,8 +18,10 @@ func main() {
 	mongoClient := configs.GetMongoClient()
 	defer mongoClient.Disconnect(context.TODO())
 
+	//TODO connection is closing during message consume attempt
 	rmqConn := configs.GetConnection()
 	defer rmqConn.Close()
+	go passwords.ConsumeMessages()
 
 	router := gin.Default()
 	passwords.SetupRoutes(router)

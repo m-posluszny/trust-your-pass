@@ -6,9 +6,13 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	"inf/gateway-service/configs"
 	"log"
+	"time"
 )
 
 func PublishMessage(message interface{}) {
+
+	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	encoded, err := json.Marshal(message)
 	if err != nil {
@@ -23,10 +27,12 @@ func PublishMessage(message interface{}) {
 		})
 	if err != nil {
 		log.Fatalf("Error publishing message: %s", err)
+	} else {
+		log.Printf("Message sent to queue %+v", message)
 	}
 }
 
-func ConsumeMessages(messageType interface{}) {
+func ConsumeMessages() {
 
 	messages, err := configs.GetChannel().ConsumeWithContext(context.Background(),
 		configs.EnvList.RabbitMQModelOutQueueName, "", true, false, false, false, nil)
@@ -34,7 +40,7 @@ func ConsumeMessages(messageType interface{}) {
 		log.Fatalf("Error consuming message: %s", err)
 	}
 
-	outMessage := messageType
+	outMessage := ModelOutMessageDto{}
 
 	k := make(chan bool)
 	go func() {
@@ -42,6 +48,9 @@ func ConsumeMessages(messageType interface{}) {
 			err = json.Unmarshal(d.Body, &outMessage)
 			if err != nil {
 				log.Fatalf("Error decoding message: %s", err)
+			} else {
+				log.Printf("Message consumed %+v", outMessage)
+				updateStrength(outMessage)
 			}
 		}
 	}()
