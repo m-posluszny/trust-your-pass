@@ -8,22 +8,12 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "password": "asdc!#"
+  "password": "asdc!#asd"
 }
 
 ###
 
 GET http://localhost:10000/api/v1/passwords/6575b9bfa60e2383e67cb4da
 Accept: application/json
-
-###
-
-PATCH http://localhost:10000/api/v1/passwords/6575b9bfa60e2383e67cb4da
-Content-Type: application/json
-Accept: application/json
-
-{
-  "strength": 3
-}
 
 ###
