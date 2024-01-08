@@ -40,6 +40,7 @@ export const MetaHeader = ({ meta }) => {
 
 export const OutputSubList = ({ index, id, expanded }) => {
     const [isExpanded, setExpanded] = useState(expanded)
+    console.log(id)
     const { output, state, error } = useResult(id)
     if (error || !output) {
         return <></>
@@ -58,7 +59,7 @@ export const OutputSubList = ({ index, id, expanded }) => {
             {output.strength > -1 ?
                 <OutputTile type={OutputSuccess} message={`Password strength: ${output.strength}`} /> :
                 loading ?
-                    < OutputTile type={OutputLoading} message="Password strength check in progress..." /> : <></>
+                    < OutputTile type={OutputLoading} message="Password strength check in progress..." /> : < OutputTile type={OutputError} message="Couldn't evaluate password strength" />
             }
             {output?.preconditions?.map((precondition) =>
                 <OutputTile type={precondition.isSatisfied ? OutputSuccess : OutputError} message={precondition.condition} />
@@ -72,6 +73,7 @@ export const OutputSubList = ({ index, id, expanded }) => {
 
 export const OutputList = () => {
     const { results } = useResults()
+    console.log("list update")
     return <div class=" p-5 rounded-2xl mx-auto " style={{ "minWidth": "400pt" }}>
         {results.map(((_, i) =>
             <OutputSubList id={i} index={results.length - i} expanded={i === 0} />

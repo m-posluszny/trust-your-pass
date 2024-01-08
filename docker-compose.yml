@@ -1,4 +1,26 @@
 services:
+  gateway:
+    build:
+      context: ./gateway-service
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+      - mongo
+    volumes:
+      - ./prod.env:/app/application.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    image: frontend:latest
+    build:
+      context: ./frontend
+    restart: on-failure
+    depends_on:
+      - gateway
+    ports:
+      - "80:80"
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
@@ -14,26 +36,4 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASSWORD}
     volumes:
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-
-  gateway-service:
-    image: gateway-service:latest
-    build:
-      dockerfile: ./gateway-service/Dockerfile
-    restart: on-failure
-    volumes:
-      - ./gateway-service.env:/app/application.env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-  frontend:
-    image: frontend:latest
-    build:
-      dockerfile: ./frontend/Dockerfile
-    restart: on-failure
-    volumes:
-      - ./frontend.env:/app/application.env
-    ports:
-      - "3000:3000"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - ./tools/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro

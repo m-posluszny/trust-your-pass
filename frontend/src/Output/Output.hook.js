@@ -22,6 +22,10 @@ export const useResults = () => {
 
     const editResult = (i, result) => { 
         result.meta = results[i].meta;
+        result.date = results[i].date;
+        if ( !result.preconditions ) {
+            result.preconditions = results[i].preconditions;
+        }
         results[i] = result;
         setResults(results);
     }
@@ -35,36 +39,37 @@ export const useResults = () => {
 
 export const useResult = (i) => {
     const {editResult,  results} = useResults();
-    const [output, setOutput] = useState(results[i]);
+    const output = results[i];
+    const uid = output?.id;
     let state = OutputError
     if (output?.IsProcessing) {
         state = OutputLoading
-    } else if (output?.preconditions?.every && output?.preconditions?.every((prec => prec.isSatisfied))) {
+    } else if (output?.strength > -1 && output?.preconditions?.every && output?.preconditions?.every((prec => prec.isSatisfied))) {
         state = OutputSuccess
     }
+    console.log(output, uid)
+    console.log("UID", uid)
 
     const { data, error } = useCore(
-        PASSWORDS(i),
+        PASSWORDS(uid),
         {},
-        typeof i === "string" && i !== "",
+        typeof uid === "string" && uid !== "",
         {
-          refreshInterval: output?.isProcessing ? 10 : 0,
+          refreshInterval: output?.isProcessing ? 100 : 0,
           revalidateIfStale: false,
           revalidateOnFocus: false,
           revalidateOnReconnect: false,
         }
       );
 
-    useEffect(() => {
-        setOutput(results[i]);
-    },[i, results])
     
     useEffect(() => {
+        console.log("DATA UPDATE",data)
         if (data && results[i] !== data) 
         {
             editResult(i, data);
         }
-    },[])
+    },[data])
 
     return {
         state,
