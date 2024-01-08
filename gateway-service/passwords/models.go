@@ -7,7 +7,7 @@ type PasswordDto struct {
 	Password      string             `json:"password,omitempty" bson:"password,omitempty"`
 	Preconditions []PreconditionDto  `json:"preconditions" bson:"preconditions,omitempty"`
 	Strength      int                `json:"strength" bson:"strength"`
-	IsProcessed   bool               `json:"isProcessed" bson:"isProcessed"`
+	IsProcessing  bool               `json:"IsProcessing" bson:"IsProcessing"`
 }
 
 type PreconditionDto struct {
@@ -19,7 +19,7 @@ type PostResponseDto struct {
 	Id            interface{}       `json:"id" bson:"id"`
 	Preconditions []PreconditionDto `json:"preconditions" bson:"preconditions"`
 	Strength      int               `json:"strength" bson:"strength"`
-	IsProcessed   bool              `json:"isProcessed" bson:"isProcessed"`
+	IsProcessing  bool              `json:"IsProcessing" bson:"IsProcessing"`
 }
 
 type ModelInMessageDto struct {
