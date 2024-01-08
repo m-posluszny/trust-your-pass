@@ -1,14 +1,10 @@
 FROM golang:1.21-alpine
 
 WORKDIR /app
-
-COPY go.mod ./
-RUN go mod download
-
-COPY *.go ./
+ADD . /app
 
 RUN go build -o /gateway-service
 
-EXPOSE 8080
+EXPOSE 10000
 
 CMD [ "/gateway-service" ]

@@ -21,3 +21,13 @@ type PostResponseDto struct {
 	Strength      int               `json:"strength" bson:"strength"`
 	IsProcessed   bool              `json:"isProcessed" bson:"isProcessed"`
 }
+
+type ModelInMessageDto struct {
+	Id       interface{} `json:"_id" bson:"_id"`
+	Password string      `json:"password" bson:"password"`
+}
+
+type ModelOutMessageDto struct {
+	Id       string `json:"_id" bson:"_id"`
+	Strength int    `json:"strength"`
+}

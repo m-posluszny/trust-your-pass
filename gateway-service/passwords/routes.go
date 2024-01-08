@@ -2,13 +2,14 @@ package passwords
 
 import (
 	"context"
-	"inf/gateway-service/configs"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"inf/gateway-service/configs"
+	"log"
+	"net/http"
+	"strconv"
 )
 
 func SetupRoutes(router *gin.Engine) {
@@ -16,9 +17,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/api/v1/passwords/:id", getById)
 	router.POST("/api/v1/passwords", insert)
 
-	//TODO should be done by listener instead?
-	router.PATCH("/api/v1/passwords/:password/update", updateStrength)
-
+	//router.PATCH("/api/v1/passwords/:id", updateStrength)
 }
 
 func getAll(c *gin.Context) {
@@ -84,6 +83,11 @@ func insert(c *gin.Context) {
 		return
 	}
 
+	PublishMessage(ModelInMessageDto{
+		Id:       result.UpsertedID,
+		Password: requestBody.Password,
+	})
+
 	//TODO id+preconditions
 	c.JSON(http.StatusCreated, PostResponseDto{
 		Id:            result.UpsertedID,
@@ -93,5 +97,38 @@ func insert(c *gin.Context) {
 	})
 }
 
-func updateStrength(c *gin.Context) {
+/*func updateStrength(c *gin.Context) {
+	collection := configs.GetPasswordCollection()
+	objId, _ := primitive.ObjectIDFromHex(c.Param("id"))
+	var requestBody map[string]int
+	if err := c.BindJSON(&requestBody); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	filter := bson.D{{"_id", objId}}
+	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"isProcessed", true}}}}
+	opts := options.Update()
+	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
+	if err != nil {
+		//mongo query issue - unlikely to happen
+		//no content?
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, bson.M{"updated": true})
+}*/
+
+func updateStrength(dto ModelOutMessageDto) {
+	collection := configs.GetPasswordCollection()
+	objId, _ := primitive.ObjectIDFromHex(dto.Id)
+	filter := bson.D{{"_id", objId}}
+	update := bson.D{{"$set", bson.D{{"strength", strconv.Itoa(dto.Strength)},
+		{"isProcessed", true}}}}
+	opts := options.Update()
+	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
+	if err != nil {
+		//mongo query issue - unlikely to happen
+		log.Printf(err.Error())
+		return
+	}
 }

@@ -43,6 +43,18 @@ services:
       - mongo
     networks:
       - bridge-network
+  # docker build -t gateway-service:latest -f ./gateway-service/Dockerfile .
+  gateway-service:
+    image: gateway-service:latest
+    restart: on-failure
+    ports:
+      - 10000:10000
+    volumes:
+      - ./gateway-service.env:/app/application.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - bridge-network
 
 #docker network create -d bridge bridge-network
 networks:
