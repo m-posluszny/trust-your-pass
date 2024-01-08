@@ -6,21 +6,21 @@ db.passwords.insertMany([
     {
         password: 'intel1',
         strength: 0,
-        isProcessed: true
+        IsProcessing: true
     },
     {
         password: 'elyass15@ajilent-ci',
         strength: 2,
-        isProcessed: true
+        IsProcessing: true
     },
     {
         password: 'hodygid757#$!23w',
         strength: 1,
-        isProcessed: true
+        IsProcessing: true
     },
     {
         password: 'notEstimatedYet',
         strength: -1,
-        isProcessed: false
+        IsProcessing: false
     }
 ]);

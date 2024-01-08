@@ -2,14 +2,15 @@ package passwords
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"inf/gateway-service/configs"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func SetupRoutes(router *gin.Engine) {
@@ -45,9 +46,9 @@ func getById(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, PasswordDto{
-		Id:          queryResult.Id,
-		Strength:    queryResult.Strength,
-		IsProcessed: queryResult.IsProcessed,
+		Id:           queryResult.Id,
+		Strength:     queryResult.Strength,
+		IsProcessing: queryResult.IsProcessing,
 	})
 }
 
@@ -68,13 +69,13 @@ func insert(c *gin.Context) {
 			Id:            nil,
 			Preconditions: preconditions,
 			Strength:      -1,
-			IsProcessed:   false,
+			IsProcessing:  false,
 		})
 		return
 	}
 
 	filter := bson.D{{"password", requestBody.Password}}
-	update := bson.D{{"$set", bson.D{{"password", requestBody.Password}, {"strength", -1}, {"isProcessed", false}}}}
+	update := bson.D{{"$set", bson.D{{"password", requestBody.Password}, {"strength", -1}, {"IsProcessing", false}}}}
 	opts := options.Update().SetUpsert(true)
 	result, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
@@ -93,7 +94,7 @@ func insert(c *gin.Context) {
 		Id:            result.UpsertedID,
 		Preconditions: preconditions,
 		Strength:      -1,
-		IsProcessed:   false,
+		IsProcessing:  true,
 	})
 }
 
@@ -106,7 +107,7 @@ func insert(c *gin.Context) {
 		return
 	}
 	filter := bson.D{{"_id", objId}}
-	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"isProcessed", true}}}}
+	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"IsProcessing", true}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
@@ -123,7 +124,7 @@ func updateStrength(dto ModelOutMessageDto) {
 	objId, _ := primitive.ObjectIDFromHex(dto.Id)
 	filter := bson.D{{"_id", objId}}
 	update := bson.D{{"$set", bson.D{{"strength", strconv.Itoa(dto.Strength)},
-		{"isProcessed", true}}}}
+		{"isProcessing", false}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
