@@ -11,7 +11,13 @@ export const useResults = () => {
     const addResult = (result, metadata) => {
         result.date =  new Date().toString();
         result.meta = metadata
+        if (results.length > 10) {
+            setResults([...results.slice(1), result])
+        } else (
         setResults([...results, result])
+
+        )
+
     }
 
     const editResult = (i, result) => { 
@@ -31,7 +37,7 @@ export const useResult = (i) => {
     const {editResult,  results} = useResults();
     const [output, setOutput] = useState(results[i]);
     let state = OutputError
-    if (!output?.isProcessed) {
+    if (output?.IsProcessing) {
         state = OutputLoading
     } else if (output?.preconditions?.every && output?.preconditions?.every((prec => prec.isSatisfied))) {
         state = OutputSuccess

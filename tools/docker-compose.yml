@@ -9,8 +9,6 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-    networks:
-      - bridge-network
 
   mongo:
     image: mongo:7.0.3
@@ -22,8 +20,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASSWORD}
     volumes:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    networks:
-      - bridge-network
 
   # Database manager and user inteface
   mongo-express:
@@ -41,11 +37,10 @@ services:
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_UI_PASSWORD}
     depends_on:
       - mongo
-    networks:
-      - bridge-network
-  # docker build -t gateway-service:latest -f ./gateway-service/Dockerfile .
+
   gateway-service:
-    image: gateway-service:latest
+    build:
+      context: ../gateway-service
     restart: on-failure
     ports:
       - 10000:10000
@@ -53,10 +48,3 @@ services:
       - ./gateway-service.env:/app/application.env
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - bridge-network
-
-#docker network create -d bridge bridge-network
-networks:
-  bridge-network:
-    external: true

@@ -44,7 +44,8 @@ export const OutputSubList = ({ index, id, expanded }) => {
     if (error || !output) {
         return <></>
     }
-    const loading = !output.isProcessed
+    const loading = output.IsProcessing
+    console.log(output, state)
 
     return <div class="bg-opacity-20 bg-white rounded-2xl p-3 text-xl mb-3" >
         <div className="flex">
@@ -71,7 +72,7 @@ export const OutputSubList = ({ index, id, expanded }) => {
 
 export const OutputList = () => {
     const { results } = useResults()
-    return <div class=" p-5 rounded-2xl mx-auto w-2/5" style={{ "minWidth": "400pt" }}>
+    return <div class=" p-5 rounded-2xl mx-auto " style={{ "minWidth": "400pt" }}>
         {results.map(((_, i) =>
             <OutputSubList id={i} index={results.length - i} expanded={i === 0} />
         ))}
