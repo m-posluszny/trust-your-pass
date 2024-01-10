@@ -1,0 +1,19 @@
+GET http://localhost:10000/api/v1/passwords/
+Accept: application/json
+
+###
+
+POST http://localhost:10000/api/v1/passwords/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "password": "12312313123dddddddddd"
+}
+
+###
+
+GET http://localhost:10000/api/v1/passwords/6575b9bfa60e2383e67cb4da
+Accept: application/json
+
+###
