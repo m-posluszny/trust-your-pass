@@ -46,9 +46,9 @@ func getById(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, PasswordDto{
-		Id:          queryResult.Id,
-		Strength:    queryResult.Strength,
-		IsProcessed: queryResult.IsProcessed,
+		Id:           queryResult.Id,
+		Strength:     queryResult.Strength,
+		IsProcessing: queryResult.IsProcessing,
 	})
 }
 
@@ -69,13 +69,13 @@ func insert(c *gin.Context) {
 			Id:            nil,
 			Preconditions: preconditions,
 			Strength:      -1,
-			IsProcessed:   false,
+			IsProcessing:  false,
 		})
 		return
 	}
 
 	filter := bson.D{{"password", requestBody.Password}}
-	update := bson.D{{"$set", bson.D{{"password", requestBody.Password}, {"strength", -1}, {"isProcessed", false}}}}
+	update := bson.D{{"$set", bson.D{{"password", requestBody.Password}, {"strength", -1}, {"isProcessing", true}}}}
 	opts := options.Update().SetUpsert(true)
 	result, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
@@ -100,7 +100,7 @@ func insert(c *gin.Context) {
 		Id:            result.UpsertedID,
 		Preconditions: preconditions,
 		Strength:      -1,
-		IsProcessed:   false,
+		IsProcessing:  false,
 	})
 }
 
@@ -113,7 +113,7 @@ func insert(c *gin.Context) {
 		return
 	}
 	filter := bson.D{{"_id", objId}}
-	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"IsProcessed", true}}}}
+	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"IsProcessing", true}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
@@ -130,7 +130,7 @@ func updateStrength(dto ModelOutMessageDto) {
 	objId, _ := primitive.ObjectIDFromHex(dto.Id)
 	filter := bson.D{{"_id", objId}}
 	update := bson.D{{"$set", bson.D{{"strength", strconv.Itoa(dto.Strength)},
-		{"isProcessed", true}}}}
+		{"isProcessing", false}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
