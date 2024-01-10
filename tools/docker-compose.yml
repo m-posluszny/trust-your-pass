@@ -57,11 +57,11 @@ services:
       - bridge-network
 
   model-service:
-    image:  model:latest
-    env_file:
-      - services.env
+    image:  model-service:latest
     volumes:
       - ./services.env:/tools/services.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - bridge-network
 
