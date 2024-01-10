@@ -13,33 +13,29 @@ strength_mapper = [3, 2, 4, 0, 1]
 model_file__name = 'model.keras'
 tokenizer_file_name = 'tokenizer.pickle'
 encoder_file_name = 'label_encoder.pickle'
-#model = load_model(model_file__name)
+model = load_model(model_file__name)
 
 # loading tokenizer
-#with open(tokenizer_file_name, 'rb') as handle:
-#    tokenizer = pickle.load(handle)
+with open(tokenizer_file_name, 'rb') as handle:
+    tokenizer = pickle.load(handle)
 
 # loading label_encoder    
-#with open(encoder_file_name, 'rb') as handle:
-#    label_encoder = pickle.load(handle)
+with open(encoder_file_name, 'rb') as handle:
+    label_encoder = pickle.load(handle)
 
 
 def predict_password_strength(jsonString):
     jsonDict = json.loads(jsonString)
-    #new_sequence = tokenizer.texts_to_sequences([jsonDict.get("password")])
-    #new_padded_sequence = pad_sequences(new_sequence, 232)
-    #prediction = model.predict(new_padded_sequence, verbose=None)
-    #predicted_class_index = np.argmax(prediction)
-    #predicted_strength = label_encoder.classes_[predicted_class_index]
-    #print(
-    #    f' [process]  Password: "{jsonDict.get("password")}", strength: {predicted_strength}, mapped_strength:  {strength_mapper[predicted_class_index]}')
+    new_sequence = tokenizer.texts_to_sequences([jsonDict.get("password")])
+    new_padded_sequence = pad_sequences(new_sequence, 232)
+    prediction = model.predict(new_padded_sequence, verbose=None)
+    predicted_class_index = np.argmax(prediction)
+    predicted_strength = label_encoder.classes_[predicted_class_index]
+    print(
+        f' [process]  Password: "{jsonDict.get("password")}", strength: {predicted_strength}, mapped_strength:  {strength_mapper[predicted_class_index]}')
 
-    # print(f' [process]  Password: "{jsonDict.get("password")}"')
-    #return json.dumps({"_id": jsonDict.get("_id"), "strength": strength_mapper[predicted_class_index]})
-
-    print(f' [process]  Password: "{jsonDict.get("password")}", strength: 111')
-    return json.dumps({"_id": jsonDict.get("_id"), "strength": 111})
-
+    print(f' [process]  Password: "{jsonDict.get("password")}"')
+    return json.dumps({"_id": jsonDict.get("_id"), "strength": strength_mapper[predicted_class_index]})
 
 def send_result(channel, modelOutQueueName, result):
     print(f" [x] Sent result: '{result}'")
