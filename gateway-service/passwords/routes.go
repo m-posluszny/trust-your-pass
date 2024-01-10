@@ -46,9 +46,9 @@ func getById(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, PasswordDto{
-		Id:           queryResult.Id,
-		Strength:     queryResult.Strength,
-		IsProcessing: queryResult.IsProcessing,
+		Id:          queryResult.Id,
+		Strength:    queryResult.Strength,
+		IsProcessed: queryResult.IsProcessed,
 	})
 }
 
@@ -69,19 +69,25 @@ func insert(c *gin.Context) {
 			Id:            nil,
 			Preconditions: preconditions,
 			Strength:      -1,
-			IsProcessing:  false,
+			IsProcessed:   false,
 		})
 		return
 	}
 
 	filter := bson.D{{"password", requestBody.Password}}
-	update := bson.D{{"$set", bson.D{{"password", requestBody.Password}, {"strength", -1}, {"IsProcessing", false}}}}
+	update := bson.D{{"$set", bson.D{{"password", requestBody.Password}, {"strength", -1}, {"isProcessed", false}}}}
 	opts := options.Update().SetUpsert(true)
 	result, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
 		//mongo query issue - unlikely to happen
 		c.JSON(http.StatusInternalServerError, err)
 		return
+	}
+	var queryResult PasswordDto
+	//gets id of object if it was not upserted - avoids sending id with nil value
+	if result.UpsertedID == nil {
+		collection.FindOne(context.TODO(), filter).Decode(&queryResult)
+		result.UpsertedID = queryResult.Id
 	}
 
 	PublishMessage(ModelInMessageDto{
@@ -94,7 +100,7 @@ func insert(c *gin.Context) {
 		Id:            result.UpsertedID,
 		Preconditions: preconditions,
 		Strength:      -1,
-		IsProcessing:  true,
+		IsProcessed:   false,
 	})
 }
 
@@ -107,7 +113,7 @@ func insert(c *gin.Context) {
 		return
 	}
 	filter := bson.D{{"_id", objId}}
-	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"IsProcessing", true}}}}
+	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"IsProcessed", true}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
@@ -124,7 +130,7 @@ func updateStrength(dto ModelOutMessageDto) {
 	objId, _ := primitive.ObjectIDFromHex(dto.Id)
 	filter := bson.D{{"_id", objId}}
 	update := bson.D{{"$set", bson.D{{"strength", strconv.Itoa(dto.Strength)},
-		{"isProcessing", false}}}}
+		{"isProcessed", true}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
