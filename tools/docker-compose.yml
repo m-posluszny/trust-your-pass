@@ -50,15 +50,18 @@ services:
     ports:
       - 10000:10000
     volumes:
-      - ./gateway-service.env:/app/application.env
+      - ./services.env:/tools/services.env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
       - bridge-network
 
   model-service:
-    image: pythonapp:latest
-    restart: on-failure
+    image:  model:latest
+    env_file:
+      - services.env
+    volumes:
+      - ./services.env:/tools/services.env
     networks:
       - bridge-network
 

@@ -130,7 +130,7 @@ func updateStrength(dto ModelOutMessageDto) {
 	objId, _ := primitive.ObjectIDFromHex(dto.Id)
 	filter := bson.D{{"_id", objId}}
 	update := bson.D{{"$set", bson.D{{"strength", strconv.Itoa(dto.Strength)},
-		{"isProcessed", false}}}}
+		{"isProcessed", true}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {

@@ -9,9 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//TODO put events to rabbitmq, add listener
 //TODO tests
-//TODO golang app docker compose
 
 func main() {
 
