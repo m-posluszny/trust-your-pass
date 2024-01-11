@@ -45,8 +45,8 @@ export const OutputSubList = ({ index, id, expanded }) => {
     if (error || !output) {
         return <></>
     }
-    const loading = output.IsProcessing
-    console.log(output, state)
+    const loading = output.isProcessing
+    console.log(output, state, loading)
 
     return <div class="bg-opacity-20 bg-white rounded-2xl p-3 text-xl mb-3" >
         <div className="flex">

@@ -5,7 +5,6 @@ import (
 	"inf/gateway-service/configs"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -100,36 +99,15 @@ func insert(c *gin.Context) {
 		Id:            result.UpsertedID,
 		Preconditions: preconditions,
 		Strength:      -1,
-		IsProcessing:  false,
+		IsProcessing:  true,
 	})
 }
-
-/*func updateStrength(c *gin.Context) {
-	collection := configs.GetPasswordCollection()
-	objId, _ := primitive.ObjectIDFromHex(c.Param("id"))
-	var requestBody map[string]int
-	if err := c.BindJSON(&requestBody); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-	filter := bson.D{{"_id", objId}}
-	update := bson.D{{"$set", bson.D{{"strength", requestBody["strength"]}, {"IsProcessing", true}}}}
-	opts := options.Update()
-	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
-	if err != nil {
-		//mongo query issue - unlikely to happen
-		//no content?
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, bson.M{"updated": true})
-}*/
 
 func updateStrength(dto ModelOutMessageDto) {
 	collection := configs.GetPasswordCollection()
 	objId, _ := primitive.ObjectIDFromHex(dto.Id)
 	filter := bson.D{{"_id", objId}}
-	update := bson.D{{"$set", bson.D{{"strength", strconv.Itoa(dto.Strength)},
+	update := bson.D{{"$set", bson.D{{"strength", dto.Strength},
 		{"isProcessing", false}}}}
 	opts := options.Update()
 	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)

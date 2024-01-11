@@ -42,7 +42,7 @@ export const useResult = (i) => {
     const output = results[i];
     const uid = output?.id;
     let state = OutputError
-    if (output?.IsProcessing) {
+    if (output?.isProcessing) {
         state = OutputLoading
     } else if (output?.strength > -1 && output?.preconditions?.every && output?.preconditions?.every((prec => prec.isSatisfied))) {
         state = OutputSuccess

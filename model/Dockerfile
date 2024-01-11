@@ -2,8 +2,10 @@ FROM python:3.10
 
 WORKDIR /app
 
+COPY requirements.txt requirements.txt
+
+RUN pip install -r /app/requirements.txt
+
 COPY . .
 
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
-
-CMD [ "python3", "main.py" ]
+CMD [ "python3", "main.py", "--env","./services.env" ]
