@@ -3,11 +3,11 @@ package passwords
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type PasswordDto struct {
-	Id            primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Id            primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Password      string             `json:"password,omitempty" bson:"password,omitempty"`
 	Preconditions []PreconditionDto  `json:"preconditions" bson:"preconditions,omitempty"`
 	Strength      int                `json:"strength" bson:"strength"`
-	IsProcessed   bool               `json:"isProcessed" bson:"isProcessed"`
+	IsProcessing  bool               `json:"isProcessing" bson:"isProcessing"`
 }
 
 type PreconditionDto struct {
@@ -19,7 +19,7 @@ type PostResponseDto struct {
 	Id            interface{}       `json:"id" bson:"id"`
 	Preconditions []PreconditionDto `json:"preconditions" bson:"preconditions"`
 	Strength      int               `json:"strength" bson:"strength"`
-	IsProcessed   bool              `json:"isProcessed" bson:"isProcessed"`
+	IsProcessing  bool              `json:"isProcessing" bson:"isProcessing"`
 }
 
 type ModelInMessageDto struct {

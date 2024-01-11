@@ -50,7 +50,7 @@ services:
     ports:
       - 10000:10000
     volumes:
-      - ./services.env:/tools/services.env
+      - ./services.env:/app/services.env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -59,7 +59,7 @@ services:
   model-service:
     image:  model-service:latest
     volumes:
-      - ./services.env:/tools/services.env
+      - ./services.env:/app/services.env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

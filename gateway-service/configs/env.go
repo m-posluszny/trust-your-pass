@@ -1,8 +1,9 @@
 package configs
 
 import (
-	"github.com/spf13/viper"
 	"log"
+
+	"github.com/spf13/viper"
 )
 
 // Initilize this variable to access the env values
@@ -27,7 +28,7 @@ type envList struct {
 // Call to load the variables from env
 func loadEnvVariables() (config *envList) {
 	// Tell viper the path/location of your env file. If it is root just add "."
-	viper.AddConfigPath("../tools/")
+	viper.AddConfigPath(".")
 
 	// Tell viper the name of your file
 	viper.SetConfigName("services")
