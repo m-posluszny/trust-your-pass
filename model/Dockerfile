@@ -8,4 +8,4 @@ RUN pip install -r /app/requirements.txt
 
 COPY . .
 
-CMD [ "python3", "main.py", "--env","./services.env" ]
+CMD [ "python3", "main.py", "--env","./application.env" ]

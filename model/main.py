@@ -85,7 +85,7 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env", help="environment", default="./tools/services.env")
+    parser.add_argument("--env", help="environment", default="./tools/application.env")
     args = parser.parse_args()
     print('loading env from: ' + args.env)
     load_dotenv(dotenv_path=args.env)

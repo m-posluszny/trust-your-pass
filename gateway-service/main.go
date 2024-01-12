@@ -16,7 +16,6 @@ func main() {
 	mongoClient := configs.GetMongoClient()
 	defer mongoClient.Disconnect(context.TODO())
 
-	//TODO connection is closing during message consume attempt
 	rmqConn := configs.GetConnection()
 	defer rmqConn.Close()
 	go passwords.ConsumeMessages()

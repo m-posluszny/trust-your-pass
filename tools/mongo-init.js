@@ -4,11 +4,6 @@ db.createCollection('passwords');
 
 db.passwords.insertMany([
     {
-        password: 'intel1',
-        strength: 0,
-        isProcessing: true
-    },
-    {
         password: 'elyass15@ajilent-ci',
         strength: 2,
         isProcessing: false

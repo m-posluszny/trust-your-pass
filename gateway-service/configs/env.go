@@ -6,10 +6,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Initilize this variable to access the env values
 var EnvList *envList
 
-// We will call this in main.go to load the env variables
 func InitEnvConfigs() {
 	EnvList = loadEnvVariables()
 }
@@ -25,23 +23,15 @@ type envList struct {
 	RabbitMQModelOutQueueName string `mapstructure:"RABBITMQ_MODEL_OUT_QUEUE_NAME"`
 }
 
-// Call to load the variables from env
 func loadEnvVariables() (config *envList) {
-	// Tell viper the path/location of your env file. If it is root just add "."
 	viper.AddConfigPath(".")
-
-	// Tell viper the name of your file
-	viper.SetConfigName("services")
-
-	// Tell viper the type of your file
+	viper.SetConfigName("application")
 	viper.SetConfigType("env")
 
-	// Viper reads all the variables from env file and log error if any found
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal("Error reading env file", err)
 	}
 
-	// Viper unmarshals the loaded env varialbes into the struct
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatal(err)
 	}

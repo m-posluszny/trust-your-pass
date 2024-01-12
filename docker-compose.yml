@@ -7,7 +7,9 @@ services:
       - rabbitmq
       - mongo
     volumes:
-      - ./prod.env:/app/services.env
+      - ./prod.env:/app/application.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     image: frontend:latest
@@ -28,7 +30,9 @@ services:
     build:
       context: ./model
     volumes:
-      - ./prod.env:/app/services.env
+      - ./prod.env:/app/application.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -47,19 +51,19 @@ services:
     volumes:
       - ./tools/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
-  # # Database manager and user inteface
-  # mongo-express:
-  #   image: mongo-express:1.0.0-20
-  #   restart: on-failure
-  #   ports:
-  #     - 9081:8081
-  #   environment:
-  #     #ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_UI_USERNAME}
-  #     #ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_UI_PASSWORD}
-  #     ME_CONFIG_MONGODB_URL: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@mongo:27017
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_UI_USERNAME}
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_UI_PASSWORD}
-  #     ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_UI_USERNAME}
-  #     ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_UI_PASSWORD}
-  #   depends_on:
-  #     - mongo
+  # Database manager and user inteface
+  #mongo-express:
+  #  image: mongo-express:1.0.0-20
+  #  restart: unless-stopped
+  #  ports:
+  #    - 9081:8081
+  #  environment:
+  #    #ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_UI_USERNAME}
+  #    #ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_UI_PASSWORD}
+  #    ME_CONFIG_MONGODB_URL: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@mongo:27017
+  #    ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_UI_USERNAME}
+  #    ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_UI_PASSWORD}
+  #    ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_UI_USERNAME}
+  #    ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_UI_PASSWORD}
+  #  depends_on:
+  #    - mongo
